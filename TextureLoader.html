@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<!-- The previous line tells the browser that the page uses the HTML5 standard. -->
+<html lang="en">
+	<head>
+		<title>Three.js tutorial - Lesson 06</title>
+		<meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
+
+		<!-- The following meta line optimizes the site for mobile devices. It sets the viewport size
+		to the screen size, so it will be displayed maximized, but unscaled. -->
+		<meta name="viewport" content="width=device-width, height=device-height, initial-scale=1">
+
+		<script src="three-js/three.js"></script>
+		<script src="three-js/Detector.js"></script>
+	</head>
+	<body>
+		<div id="WebGLCanvas" ></div>
+
+		<!-- This JavaScript block encloses the Three.js commands -->
+		<script>
+			// Global scene object
+			var scene, camera, cubeMesh, cubeMaterial
+
+			// Set the cube's 3 rotation parms
+			var xRotation = 0.0;
+			var yRotation = 0.0;
+			var zRotation = 0.0;
+
+			initializeScene();
+			animateScene();
+
+			/**
+			 * Initialize the scene.
+			 */
+			function initializeScene(){
+
+				if (Detector.webgl) {
+					renderer = new THREE.WebGLRenderer({antialias:true});
+				} else {
+					// If it's not supported, instantiate the canvas renderer to support all non WebGL browsers
+					renderer = new THREE.CanvasRenderer();
+				}
+
+				// Set the background color of the renderer to black, with full opacity
+				renderer.setClearColor(0x000000, 1);
+
+				// Get the size of the inner window (content area) to create a full size renderer
+				canvasWidth = window.innerWidth;
+				canvasHeight = window.innerHeight;
+
+				// Set the renderers size to the content areas size
+				renderer.setSize(canvasWidth, canvasHeight);
+
+				// Get the DIV element from the HTML document by its ID and append the renderer's DOM object to it
+				document.getElementById("WebGLCanvas").appendChild(renderer.domElement);
+
+				// Create the scene, in which all objects are stored (e. g. camera, lights, geometries, ...)
+				scene = new THREE.Scene();
+
+				// Now that we have a scene, we want to look into it. Therefor we need a camera.
+				// After definition, the camera has to be added to the scene.
+				camera = new THREE.PerspectiveCamera(45, canvasWidth / canvasHeight, 1, 100);
+				camera.position.set(0, 0, 10);
+				camera.lookAt(scene.position);
+				scene.add(camera);
+
+				// Create the cube
+				var cubeGeometry = new THREE.BoxGeometry(2.0, 2.0, 2.0);
+
+				// Load an image as texture
+				const loader = new THREE.TextureLoader();
+				loader.setCrossOrigin('anonymous');
+				loader.load(
+						"images/nehe.jpg",
+			   			//onload callback
+						createCube,
+						// omProgress (not supported)
+               			undefined,
+						// onError
+						function ( err ) {
+							console.error("An error occurred..." + err);
+						}
+				);
+
+				function createCube( texture ) {
+					cubeMaterial = new THREE.MeshBasicMaterial({map: texture});
+					// Create a mesh and add the geometry and the material.
+					cubeMesh = new THREE.Mesh(cubeGeometry, cubeMaterial);
+					cubeMesh.position.set(0.0, 0.0, 4.0);
+					scene.add(cubeMesh);
+				}
+		}
+
+			/**
+			 * Animate the scene and call rendering.
+			 */
+			function animateScene() {
+
+				if (cubeMesh !== undefined) {
+					// Increase the x, y and z rotation of the cube
+					xRotation += 0.03;
+					yRotation += 0.02;
+					zRotation += 0.04;
+					cubeMesh.rotation.set(xRotation, yRotation, zRotation);
+				}
+
+				requestAnimationFrame(animateScene);
+
+				// Map the 3D scene down to the 2D screen (render the frame)
+				renderer.render(scene, camera);
+			}
+
+		</script>
+	</body>
+</html>
