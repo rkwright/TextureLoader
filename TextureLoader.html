@@ -62,7 +62,7 @@
 				camera.position.set(0, 0, 10);
 				camera.lookAt(scene.position);
 				scene.add(camera);
-
+				{}
 				// Create the cube
 				var cubeGeometry = new THREE.BoxGeometry(2.0, 2.0, 2.0);
 
@@ -71,23 +71,21 @@
 				loader.setCrossOrigin('anonymous');
 				loader.load(
 						"images/nehe.jpg",
-			   			//onload callback
-						createCube,
-						// omProgress (not supported)
+						// onLoad
+						function ( texture ) {
+							cubeMaterial = new THREE.MeshBasicMaterial({map: texture});
+							// Create a mesh and add the geometry and the material.
+							cubeMesh = new THREE.Mesh(cubeGeometry, cubeMaterial);
+							cubeMesh.position.set(0.0, 0.0, 4.0);
+							scene.add(cubeMesh);
+						},
+						// omProgress (no longer supported)
                			undefined,
 						// onError
 						function ( err ) {
 							console.error("An error occurred..." + err);
 						}
 				);
-
-				function createCube( texture ) {
-					cubeMaterial = new THREE.MeshBasicMaterial({map: texture});
-					// Create a mesh and add the geometry and the material.
-					cubeMesh = new THREE.Mesh(cubeGeometry, cubeMaterial);
-					cubeMesh.position.set(0.0, 0.0, 4.0);
-					scene.add(cubeMesh);
-				}
 		}
 
 			/**
