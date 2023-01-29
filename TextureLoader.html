@@ -1,12 +1,12 @@
 <!DOCTYPE html>
-<!-- The previous line tells the browser that the page uses the HTML5 standard. -->
 <html lang="en">
 	<head>
-		<title>Three.js tutorial - Lesson 06</title>
+		<!--
+  			@author: rkwright@geofx.com
+		-->
+		<title>Loading Textures in Three.js</title>
 		<meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
-
-		<!-- The following meta line optimizes the site for mobile devices. It sets the viewport size
-		to the screen size, so it will be displayed maximized, but unscaled. -->
+		<!-- Set the viewport size to the screen size, so it will be displayed maximized, but unscaled. -->
 		<meta name="viewport" content="width=device-width, height=device-height, initial-scale=1">
 
 		<script src="three-js/three.js"></script>
@@ -17,16 +17,14 @@
 
 		<!-- This JavaScript block encloses the Three.js commands -->
 		<script>
-			// Global scene object
-			var scene, camera, cubeMesh, cubeMaterial
-			var initComplete;
-			// Set the cube's 3 rotation parms
+			// Globals (ick)
+			var renderer, scene, camera, cubeMesh;
+			// Set the cube's 3 rotation params
 			var xRotation = 0.0;
 			var yRotation = 0.0;
 			var zRotation = 0.0;
 
 			initializeScene();
-			animateScene();
 
 			/**
 			 * Initialize the scene.
@@ -44,8 +42,8 @@
 				renderer.setClearColor(0x000000, 1);
 
 				// Get the size of the inner window (content area) to create a full size renderer
-				canvasWidth = window.innerWidth;
-				canvasHeight = window.innerHeight;
+				let canvasWidth = window.innerWidth;
+				let canvasHeight = window.innerHeight;
 
 				// Set the renderers size to the content areas size
 				renderer.setSize(canvasWidth, canvasHeight);
@@ -62,87 +60,58 @@
 				camera.position.set(0, 0, 10);
 				camera.lookAt(scene.position);
 				scene.add(camera);
-				//{
-				//}
-				// Create the cube
-				var cubeGeometry = new THREE.BoxGeometry(2.0, 2.0, 2.0);
 
-				event();
+				createMaterial("images/nehe.jpg", finishInit)
+			}
 
+			/**
+			 * Called when the textures and other resources have been loaded
+			 */
+			function finishInit ( material ) {
+				let geometry = new THREE.BoxGeometry(2.0, 2.0, 2.0);
+				cubeMesh = new THREE.Mesh(geometry, material);
+				cubeMesh.position.set(0.0, 0.0, 4.0);
+				scene.add(cubeMesh);
+				animateScene();
+			}
+
+			/**
+			 * Load the specified texture (url).  When the async call comes to the onload method,
+			 * create the material and call back with the result
+			 */
+			function createMaterial ( url, callBack ) {
 				// Load an image as texture
 				const loader = new THREE.TextureLoader();
 				loader.setCrossOrigin('anonymous');
 				loader.load(
-						"images/nehe.jpg",
-						// onLoad
-						function (texture) {
-							cubeMaterial = new THREE.MeshBasicMaterial({map: texture});
-							// Create a mesh and add the geometry and the material.
-							cubeMesh = new THREE.Mesh(cubeGeometry, cubeMaterial);
-							cubeMesh.position.set(0.0, 0.0, 4.0);
-							scene.add(cubeMesh);
-						},
-						// omProgress (no longer supported)
-						undefined,
-						// onError
-						function (err) {
-							console.error("An error occurred..." + err);
-						}
-				);
-
-				function createMaterial (url ) {
-					// Load an image as texture
-					const loader = new THREE.TextureLoader();
-					loader.setCrossOrigin('anonymous');
-					loader.load(
-						url,
-						// onLoad
-						function (texture) {
-							material = new THREE.MeshBasicMaterial({map: texture});
-							return material;
-						},
-						// omProgress (no longer supported)
-						undefined,
-						// onError
-						function (err) {
-							console.error("An error occurred..." + err);
-						}
-					)
-					return undefined;
-				}
-				function event () {
-					// Add an event listener
-					document.addEventListener("init-complete", function(e) {
-						console.log(e.detail);
-					});
-					// Create the event
-					var event = new CustomEvent("init-complete", { "detail": "Initialization is complete" });
-
-					// Dispatch/Trigger/Fire the event
-					document.dispatchEvent(event);
-				}
-
+					url,
+					function (texture) { 	// onLoad
+						let material = new THREE.MeshBasicMaterial({map: texture});
+						callBack( material );
+					},
+					undefined, 				// onProgress (no longer supported)
+					function (err) {		// onError
+						console.error("An error occurred..." + err);
+					}
+				)
 			}
 
 			/**
 			 * Animate the scene and call rendering.
 			 */
 			function animateScene() {
+				// Increase the x, y and z rotation of the cube
+				xRotation += 0.03;
+				yRotation += 0.02;
+				zRotation += 0.04;
+				cubeMesh.rotation.set(xRotation, yRotation, zRotation);
 
-				if (cubeMesh !== undefined) {
-					// Increase the x, y and z rotation of the cube
-					xRotation += 0.03;
-					yRotation += 0.02;
-					zRotation += 0.04;
-					cubeMesh.rotation.set(xRotation, yRotation, zRotation);
-				}
-
+				// request that this func be called again
 				requestAnimationFrame(animateScene);
 
 				// Map the 3D scene down to the 2D screen (render the frame)
 				renderer.render(scene, camera);
 			}
-
 		</script>
 	</body>
 </html>
