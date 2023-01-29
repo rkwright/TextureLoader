@@ -19,7 +19,7 @@
 		<script>
 			// Global scene object
 			var scene, camera, cubeMesh, cubeMaterial
-
+			var initComplete;
 			// Set the cube's 3 rotation parms
 			var xRotation = 0.0;
 			var yRotation = 0.0;
@@ -31,10 +31,10 @@
 			/**
 			 * Initialize the scene.
 			 */
-			function initializeScene(){
+			function initializeScene() {
 
 				if (Detector.webgl) {
-					renderer = new THREE.WebGLRenderer({antialias:true});
+					renderer = new THREE.WebGLRenderer({antialias: true});
 				} else {
 					// If it's not supported, instantiate the canvas renderer to support all non WebGL browsers
 					renderer = new THREE.CanvasRenderer();
@@ -62,9 +62,12 @@
 				camera.position.set(0, 0, 10);
 				camera.lookAt(scene.position);
 				scene.add(camera);
-				{}
+				//{
+				//}
 				// Create the cube
 				var cubeGeometry = new THREE.BoxGeometry(2.0, 2.0, 2.0);
+
+				event();
 
 				// Load an image as texture
 				const loader = new THREE.TextureLoader();
@@ -72,7 +75,7 @@
 				loader.load(
 						"images/nehe.jpg",
 						// onLoad
-						function ( texture ) {
+						function (texture) {
 							cubeMaterial = new THREE.MeshBasicMaterial({map: texture});
 							// Create a mesh and add the geometry and the material.
 							cubeMesh = new THREE.Mesh(cubeGeometry, cubeMaterial);
@@ -80,13 +83,46 @@
 							scene.add(cubeMesh);
 						},
 						// omProgress (no longer supported)
-               			undefined,
+						undefined,
 						// onError
-						function ( err ) {
+						function (err) {
 							console.error("An error occurred..." + err);
 						}
 				);
-		}
+
+				function createMaterial (url ) {
+					// Load an image as texture
+					const loader = new THREE.TextureLoader();
+					loader.setCrossOrigin('anonymous');
+					loader.load(
+						url,
+						// onLoad
+						function (texture) {
+							material = new THREE.MeshBasicMaterial({map: texture});
+							return material;
+						},
+						// omProgress (no longer supported)
+						undefined,
+						// onError
+						function (err) {
+							console.error("An error occurred..." + err);
+						}
+					)
+					return undefined;
+				}
+				function event () {
+					// Add an event listener
+					document.addEventListener("init-complete", function(e) {
+						console.log(e.detail);
+					});
+					// Create the event
+					var event = new CustomEvent("init-complete", { "detail": "Initialization is complete" });
+
+					// Dispatch/Trigger/Fire the event
+					document.dispatchEvent(event);
+				}
+
+			}
 
 			/**
 			 * Animate the scene and call rendering.
